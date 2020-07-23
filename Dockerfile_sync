@@ -2,45 +2,52 @@ FROM centos:centos8
 
 # Install the needed bits for centos
 RUN yum -y update
-RUN yum -y install openssl-devel
-RUN yum -y install gcc
-RUN yum -y install gcc-c++
-RUN yum -y install postgresql-devel
-
+RUN yum -y install openssl-devel gcc gcc-c++ make postgresql-devel
 
 # Build jsonP and install as a shared lib
 ENV jsonp_src src/jsonP
 ENV jsonp_dst /opt/jsonP
 ENV jsonp_bld /opt/build/jsonp
 
-RUN mkdir -p ${jsonp_bld}/src
-RUN mkdir -p ${jsonp_dst}/include
+RUN set -ex; \
+	mkdir -p ${jsonp_bld}/src; \
+	mkdir -p ${jsonp_dst}/include
 
 COPY ${jsonp_src}/include/*.h ${jsonp_dst}/include/
 COPY ${jsonp_src}/bin/*.cpp ${jsonp_bld}/src/
 COPY ${jsonp_src}/jsonP-libs.conf /etc/ld.so.conf.d/
+COPY ${jsonp_src}/Makefile ${jsonp_bld}/src/
 
-RUN g++ -O3 -fPIC -I ${jsonp_dst}/include ${jsonp_bld}/src/*.cpp -shared -o ${jsonp_dst}/libjsonP.so.1.0 -Wl,-soname,libjsonP.so.1
+#RUN g++ -O3 -fPIC -I ${jsonp_dst}/include ${jsonp_bld}/src/*.cpp -shared -o ${jsonp_dst}/libjsonP.so.1.0 -Wl,-soname,libjsonP.so.1
+RUN set -ex; \
+	cd ${jsonp_bld}/src; \
+	make	
 
-RUN ldconfig
-RUN ln /opt/jsonP/libjsonP.so.1 /opt/jsonP/libjsonP.so
-RUN ldconfig
+RUN set -ex; \
+	ldconfig; \
+	ln /opt/jsonP/libjsonP.so.1 /opt/jsonP/libjsonP.so; \
+	ldconfig
 
 
 # Build sync_server
 ENV sync_src src/sync/src
-ENV sync_cfg src/sync
+ENV sync_cfg src/sync/config
 ENV sync_dst /opt/sync_server
 ENV sync_bld /opt/build/sync_server
 
-RUN mkdir -p ${sync_dst}
-RUN mkdir -p ${sync_bld}
+RUN set -ex; \
+	mkdir -p ${sync_dst}; \
+	mkdir -p ${sync_bld}
 
 COPY ${sync_src}/*.h ${sync_bld}/
 COPY ${sync_src}/*.cpp ${sync_bld}/
 COPY ${sync_cfg}/* ${sync_dst}/
+COPY ${sync_cfg}/Makefile ${sync_bld}/
 
-RUN g++ -O2 -I ${jsonp_dst}/include -I /usr/include/openssl -pthread -o ${sync_dst}/sync_server ${sync_bld}/*.cpp -lpq -L${jsonp_dst} -ljsonP -lssl -lcrypto -Wl,-rpath,${jsonp_dst}
+#RUN g++ -O2 -I ${jsonp_dst}/include -I /usr/include/openssl -pthread -o ${sync_dst}/sync_server ${sync_bld}/*.cpp -lpq -L${jsonp_dst} -ljsonP -lssl -lcrypto -Wl,-rpath,${jsonp_dst}
+RUN set -ex; \
+	cd ${sync_bld}; \
+	make
 
 
 EXPOSE 8443
