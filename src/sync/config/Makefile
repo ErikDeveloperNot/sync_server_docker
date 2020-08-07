@@ -1,4 +1,4 @@
-INCLUDES=-I /opt/jsonP/include -I /usr/include/openssl
+INCLUDES=-I /opt/jsonP/include -I /usr/include/openssl -I /opt/hiredis
 CXX=g++
 
 # Max performance, 03 runs into issues
@@ -10,11 +10,11 @@ CXXFLAGS=-g -O2 -fgcse-after-reload -fipa-cp-clone -floop-interchange -floop-unr
 # Default build
 #CXXFLAGS=-pthread
 
-LIBS=-lpq -L/opt/jsonP -ljsonP -lssl -lcrypto
+LIBS=-lpq -L/opt/jsonP -ljsonP -lssl -lcrypto -lhiredis
 LDFLAGS=-Wl,-rpath,/opt/jsonP
 FINAL_DIR=/opt/sync_server
 
-OBJ=Config.o register_server_exception.o config_http.o server.o data_store_connection.o main.o sync_handler.o
+OBJ=Config.o register_server_exception.o config_http.o server.o data_store_connection.o main.o sync_handler.o RedisStore.o
 
 #OBJ = ./src/file_chunk_impl.cpp ./src/jsonP_json.cpp ./src/jsonP_push_parser.cpp ./src/jsonP_buffer_parser.cpp ./src/jsonP_parser.cpp
 

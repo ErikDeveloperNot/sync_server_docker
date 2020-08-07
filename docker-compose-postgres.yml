@@ -1,0 +1,15 @@
+passvault-db:
+  image: erikdevelopernot/passvault-db-postgres
+  environment:
+    - POSTGRES_USER=passvault-user
+    - POSTGRES_PASSWORD=passvault-secret
+    - POSTGRES_DB=passvault
+    - POSTGRES_HOST_AUTH_METHOD=password
+
+sync-server:
+  image: erikdevelopernot/sync-server-postgres
+  ports:
+    - 8443:8443
+  links:
+    - passvault-db
+

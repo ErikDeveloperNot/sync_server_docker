@@ -1,0 +1,10 @@
+passvault-redis:
+  image: erikdevelopernot/passvault-db-redis 
+
+sync-server:
+  image: erikdevelopernot/sync-server-redis
+  ports:
+    - 8443:8443
+  links:
+    - passvault-redis
+

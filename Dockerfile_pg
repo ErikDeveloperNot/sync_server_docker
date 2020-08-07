@@ -20,7 +20,7 @@ RUN set -ex; \
                 apt-get install -y vim; \
                 apt-get install -y procps; \
 		rm -rf /var/lib/apt/lists/*; \
-		useradd passvault-user
+		useradd --create-home passvault-user
 
 # explicitly set user/group IDs
 RUN set -eux; \
